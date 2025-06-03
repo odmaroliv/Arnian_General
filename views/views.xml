@@ -176,7 +176,6 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='product_template_id']" position="attributes">
                 <attribute name="domain">[('detailed_type', '=', 'service')]</attribute>
-                <attribute name="options">{'no_create': True}</attribute>
             </xpath>
         </field>
     </record>
