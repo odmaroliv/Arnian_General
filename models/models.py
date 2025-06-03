@@ -42,10 +42,20 @@ class ProductTemplate(models.Model):
     ], string="Tipo de Pago", help="Selecciona el tipo de pago del cliente")
     
     a_qty_etiquetas = fields.Integer("Etiquetas", default=False, help="Numero de etiquetas o bultos.")
-    # Campo para almacenar la ubicacion actual
-    current_location  = fields.Char('Current ', help="Ubicacion actual")
+    # Campo para almacenar la ubicación actual
+    current_location = fields.Char('Current Location', help="Ubicacion actual")
+    # Historial de cambios en el número de salida
+    output_history_ids = fields.One2many('product.output.history', 'product_tmpl_id',
+                                         string='Output History', readonly=True)
     
     def write(self, vals):
+        if 'output_number' in vals:
+            for record in self:
+                if record.output_number and record.output_number != vals['output_number']:
+                    self.env['product.output.history'].create({
+                        'product_tmpl_id': record.id,
+                        'output_number': record.output_number,
+                    })
         result = super(ProductTemplate, self).write(vals)
         
         if 'reviewed' in vals and vals['reviewed']:
@@ -99,9 +109,19 @@ class ProductProduct(models.Model):
     is_finished = fields.Boolean("Finalizada", related='product_tmpl_id.is_finished', readonly=True, store=True)
     reviewed = fields.Boolean("Revisada", related='product_tmpl_id.reviewed', readonly=True, store=True)
     last_quoted_by = fields.Many2one('res.users', string="Last Quoted By", readonly=True, help="User who last quoted this product.")
-    current_location  = fields.Char('Current ', help="Ubicacion actual", related='product_tmpl_id.current_location', readonly=True, store=True)
+    current_location = fields.Char('Current Location', help="Ubicacion actual", related='product_tmpl_id.current_location', readonly=True, store=True)
     is_in_carga = fields.Boolean("En Carga", default=False, help="Indica si el producto ya se asigno a una carga actualmente." ,related='product_tmpl_id.is_in_carga', readonly=True, store=True)
     t_operacion = fields.Integer("Operacion", default=False, help="Indica el tipo de operacion de la mercancia.", related='product_tmpl_id.t_operacion', readonly=True, store=True)
+
+
+# Historial de salidas por producto
+class ProductOutputHistory(models.Model):
+    _name = 'product.output.history'
+    _description = 'Historial de Salidas'
+
+    product_tmpl_id = fields.Many2one('product.template', string='Product Template', ondelete='cascade')
+    output_number = fields.Char('Output Number')
+    changed_at = fields.Datetime('Changed At', default=fields.Datetime.now)
 
 
 # Extensión del modelo de línea de pedido de venta para incluir funcionalidad adicional.
