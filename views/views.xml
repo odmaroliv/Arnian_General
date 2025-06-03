@@ -1,0 +1,303 @@
+<odoo>
+  <data>
+  <!--Define a las entradas relacionadas con un cliente-->
+<record id="view_product_template_form_inherit" model="ir.ui.view">
+        <field name="name">product.template.form.inherit</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='categ_id']" position="after">
+                <field name="related_partner_id"/>
+                <field name="related_agent_id"/>
+                <field name="tipo_pago"/>
+                <field name="current_location" groups="base.group_system"/>
+                <field name="is_in_carga" groups="base.group_system"/>
+                <field name="t_operacion"/>
+                <field name="a_qty_etiquetas" groups="base.group_system"/>
+                <field name="current_quote" groups="base.group_system"/>
+            </xpath>
+            <xpath expr="//field[@name='list_price']" position="attributes">
+                <attribute name="groups">base.group_system</attribute> 
+            </xpath>
+             <xpath expr="//field[@name='uom_po_id']" position="attributes">
+                <attribute name="groups">base.group_system</attribute>
+            </xpath>
+            <xpath expr="//field[@name='uom_id']" position="attributes">
+                <attribute name="groups">base.group_system</attribute>
+            </xpath>
+        </field>
+ </record>
+
+
+<record id="product_product_search_inherit" model="ir.ui.view">
+    <field name="name">product.product.search.inherit</field>
+    <field name="model">product.product</field>
+    <field name="inherit_id" ref="product.product_view_search_catalog"/>
+    <field name="arch" type="xml">
+        <search>
+            <field name="related_partner_id" string="Client for:"/>
+        </search>
+    </field>
+</record>
+
+<record id="product_template_search_inherit" model="ir.ui.view">
+        <field name="name">product.template.search.inherit</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_search_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group" position="inside">
+                <field name="related_partner_id" string="Client for:"/>
+            </xpath>
+        </field>
+    </record>
+
+<!--IsQuote campos para definir una entrada como cotizada o no-->
+<record id="view_product_template_form_inherit_is_quoted" model="ir.ui.view">
+            <field name="name">product.template.form.inherit.is.quoted</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='list_price']" position="after">
+                    <group>
+                       <field name="is_quoted" groups="base.group_system"/>
+                       <field name="bee_notify"/>
+                       <field name="is_ready_for_bill" groups="base.group_system"/>
+                       <field name="is_finished" groups="base.group_system"/>
+                       <field name="reviewed" groups="base.group_system"/>
+                       <field name="is_dedicated" groups="base.group_system,sales_team.group_sale_manager"/>
+                    </group>
+                </xpath>
+            </field>
+        </record>
+    <!-- Extiende la vista de búsqueda de productos -->
+        <record id="product_search_inherit_is_quoted" model="ir.ui.view">
+            <field name="name">product.template.search.inherit.is.quoted</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_search_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//filter[@name='inactive']" position="before">
+                    <!-- Agrega un separador de filtro -->
+                    <separator string="Generales" />
+                    <!-- Agrega los filtros para productos cotizados y no cotizados -->
+                    <filter string="Mis Cotizados" name="quoted" domain="[('related_agent_id','=',uid),('is_quoted','=',True),('is_finished','=',False)]"/>
+                    <filter string="Mis Entradas No Cotizadas" name="my_non_quoted_products" domain="[('related_agent_id','=',uid),('is_quoted','=',False),('is_finished','=',False)]"/>
+                    <filter string="Mis entradas Sin carga" name="not_carga" domain="[('related_agent_id','=',uid),('is_in_carga','=',False),('is_finished','=',False)]"/>
+                    <filter string="Mis Entradas" name="my_products" domain="[('related_agent_id','=',uid),('is_finished','=',False)]" /> 
+                    <filter string="Mis entradas sin valor" name="my_products_not_val" domain="[('related_agent_id','=',uid),('standard_price','=',0),('is_finished','=',False)]"/>
+                    <filter string="Mis entradas listas para entregar" name="my_products_ready" domain="[('related_agent_id','=',uid),('is_ready_for_bill','=',True),('is_finished','=',False)]"/>
+                    <filter string="Mis entradas Finalizadas" name="my_products_is_finished" domain="[('related_agent_id','=',uid),('is_finished','=',True)]"/>
+                    <filter string="Mis entradas Revisadas" name="my_products_reviewed" domain="[('related_agent_id','=',uid),('reviewed','=',True)]"/>
+                     <!-- tipos de operaciones -->
+                     <separator string="Tipos de Operaciones (No Finalizadas)" />
+                    <filter string="Auto Declaracion" name="t_auto" domain="[('t_operacion','=','01'),('is_finished','=',False),('related_agent_id','=',uid)]"/>
+                    <filter string="Importacion" name="t_impo" domain="[('t_operacion','=','02'),('is_finished','=',False),('related_agent_id','=',uid)]"/>
+                    <filter string="Exportacion" name="t_expo" domain="[('t_operacion','=','03'),('is_finished','=',False),('related_agent_id','=',uid)]"/>
+                    <filter string="Entrega Nacional" name="t_nacional" domain="[('t_operacion','=','04'),('is_finished','=',False),('related_agent_id','=',uid)]"/>
+                    <filter string="Movimiento Local" name="t_local" domain="[('t_operacion','=','05'),('is_finished','=',False),('related_agent_id','=',uid)]"/>
+                    <filter string="Patrocinio" name="t_patrocinio" domain="[('t_operacion','=','06'),('is_finished','=',False),('related_agent_id','=',uid)]"/>    
+                    <!-- tipos de pago -->
+                    <separator string="Tipos de Pago (No Finalizadas)" />
+                    <filter string="Contra Entrega" name="t_pago_contra_entrega" domain="[('tipo_pago','=','contra_entrega'),('is_finished','=',False),('related_agent_id','=',uid)]"/>
+                    <filter string="Transferencia" name="t_pago_transferencia" domain="[('tipo_pago','=','transferencia'),('is_finished','=',False),('related_agent_id','=',uid)]"/>
+                    <filter string="Patrocinio" name="t_pago_patrocinio" domain="[('tipo_pago','=','patrocinio'),('is_finished','=',False),('related_agent_id','=',uid)]"/>
+                    <filter string="Cheque" name="t_pago_cheque" domain="[('tipo_pago','=','cheque'),('is_finished','=',False),('related_agent_id','=',uid)]"/>
+                    <filter string="Tarjeta de credito" name="tipo_pago_tarjeta_de_credito" domain="[('tipo_pago','=','tarjeta_de_credito'),('is_finished','=',False),('related_agent_id','=',uid)]"/>
+                    <filter string="Estado cuenta" name="tipo_pago_estado_cuenta" domain="[('tipo_pago','=','estado_cuenta'),('is_finished','=',False),('related_agent_id','=',uid)]"/>    
+                    <filter string="Efectivo" name="tipo_pago_efectivo" domain="[('tipo_pago','=','efectivo'),('is_finished','=',False),('related_agent_id','=',uid)]"/>    
+                </xpath>
+            </field>
+        </record>
+
+    <record id="product_product_search_inherit" model="ir.ui.view">
+        <field name="name">product.product.search.inherit.filters</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_view_search_catalog"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+            <separator string="Generales" />
+                <field name="related_partner_id" string="Client for:"/>
+                    <!-- Agrega los filtros para productos cotizados y no cotizados en product.product -->
+                    <filter string="Cotizados" name="quoted" domain="[('related_agent_id','=',uid),('is_quoted','=',True),('is_finished','=',False)]"/>
+                    <!-- Agregar filtro para mostrar solo productos relacionados con el agente actual -->
+                    <filter string="Sin carga" name="not_carga" domain="[('related_agent_id','=',uid),('is_in_carga','=',False),('is_finished','=',False)]"/>
+                    <filter string="Mis Entradas" name="my_products" domain="[('related_agent_id','=',uid),('is_finished','=',False)]" /> 
+                    <filter string="Mis Productos No Cotizados" name="my_non_quoted_products" domain="[('related_agent_id','=',uid),('is_quoted','=',False),('is_finished','=',False)]"/>
+                    <filter string="Mis entradas listas para entregar" name="my_products_ready" domain="[('related_agent_id','=',uid),('is_ready_for_bill','=',True),('is_finished','=',False)]"/>
+                    <filter string="Mis entradas finalizadas" name="my_products_reviewed" domain="[('related_agent_id','=',uid),('reviewed','=',True)]"/>
+                    
+                    <!-- tipos de operaciones -->
+                    <separator string="Tipos de Operaciones" />
+                    <filter string="Auto Declaracion" name="t_auto" domain="[('t_operacion','=','01'),('is_finished','=',False),('related_agent_id','=',uid)]"/>
+                    <filter string="Importacion" name="t_impo" domain="[('t_operacion','=','02'),('is_finished','=',False),('related_agent_id','=',uid)]"/>
+                    <filter string="Exportacion" name="t_expo" domain="[('t_operacion','=','03'),('is_finished','=',False),('related_agent_id','=',uid)]"/>
+                    <filter string="Entrega Nacional" name="t_nacional" domain="[('t_operacion','=','04'),('is_finished','=',False),('related_agent_id','=',uid)]"/>
+                    <filter string="Movimiento Local" name="t_local" domain="[('t_operacion','=','05'),('is_finished','=',False),('related_agent_id','=',uid)]"/>
+                    <filter string="Patrocinio" name="t_patrocinio" domain="[('t_operacion','=','06'),('is_finished','=',False),('related_agent_id','=',uid)]"/>
+            <!-- tipos de pago -->
+                    <separator string="Tipos de Pago" />
+                    <filter string="Contra Entrega" name="t_pago_contra_entrega" domain="[('tipo_pago','=','contra_entrega'),('is_finished','=',False),('related_agent_id','=',uid)]"/>
+                    <filter string="Transferencia" name="t_pago_transferencia" domain="[('tipo_pago','=','transferencia'),('is_finished','=',False),('related_agent_id','=',uid)]"/>
+                    <filter string="Patrocinio" name="t_pago_patrocinio" domain="[('tipo_pago','=','patrocinio'),('is_finished','=',False),('related_agent_id','=',uid)]"/>
+                    <filter string="Cheque" name="t_pago_cheque" domain="[('tipo_pago','=','cheque'),('is_finished','=',False),('related_agent_id','=',uid)]"/>
+                    <filter string="Tarjeta de credito" name="tipo_pago_tarjeta_de_credito" domain="[('tipo_pago','=','tarjeta_de_credito'),('is_finished','=',False),('related_agent_id','=',uid)]"/>
+                    <filter string="Estado cuenta" name="tipo_pago_estado_cuenta" domain="[('tipo_pago','=','estado_cuenta')]"/>    
+                    <filter string="Efectivo" name="tipo_pago_efectivo" domain="[('tipo_pago','=','efectivo'),('is_finished','=',False),('related_agent_id','=',uid)]"/>    
+                </xpath>
+        </field>
+    </record>
+
+
+<record id="action_open_product_catalog" model="ir.actions.act_window">
+    <field name="name">Catálogo de Productos</field>
+    <field name="res_model">product.product</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{'search_default_my_non_quoted_products': 1}</field>
+</record>
+<record id="sale.product_template_action" model="ir.actions.act_window">
+    <field name="context">{"search_default_filter_to_sell":1, "sale_multi_pricelist_product_template": 1, 'search_default_my_non_quoted_products': 1}</field>
+</record>
+
+ <!--Permite solo la busqueda de servicios en linea lo que forza a usar el catalogo para buscar entradas-->
+ <record id="view_sale_order_line_form_inherit" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='product_template_id']" position="attributes">
+                <attribute name="domain">[('detailed_type', '=', 'service')]</attribute>
+                <attribute name='options'>{'no_create': True}</attribute>"
+            </xpath>
+        </field>
+    </record>
+
+    <!--Permite la cotizacion con Porcentajes-->
+     <record id="sale_order_form_inherit" model="ir.ui.view">
+            <field name="name">sale.order.form.inherit</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/> <!-- El ID externo de la vista de formulario de la orden de venta -->
+            <field name="arch" type="xml">
+                <!-- Añadir el campo x_percentage después del campo product_id en la vista de lista de líneas de pedido -->
+                <xpath expr="//field[@name='order_line']/tree/field[@name='product_uom_qty']" position="after">
+                    <field name="x_percentage"/>
+                </xpath>
+            </field>
+        </record>
+
+
+    <!--Permite agregar campos a la vista kban de productos.templante-->
+     <record id="product_template_kanban_view_inherit" model="ir.ui.view">
+        <field name="name">product.template.kanban.inherit</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_kanban_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[contains(@class, 'oe_kanban_global_click')]" position="inside">
+                <div class="o_kanban_record_bottom">
+                    <div><b>Valor Factura:</b></div>
+                    <field name="standard_price" widget="monetary"/>
+                    <field name="currency_id" invisible="1"/>
+                </div>
+                <div class="o_kanban_record_bottom">
+                    <div><b>Cliente:</b></div>
+                    <field name="related_partner_id" options="{'no_create': True}"/>
+                </div>
+                <div class="o_kanban_record_bottom">
+                    <div><b>Número de Etiquetas:</b></div>
+                    <field name="a_qty_etiquetas"/>
+                </div>
+            </xpath>
+            <xpath expr="//field[@name='list_price']" position="replace">
+                <field name="list_price" invisible="1"/>
+            </xpath>
+            
+        </field>
+    </record>
+
+    <!--Permite agregar campos a la vista kban de productos en el catálogo-->
+    <record id="product_catalog_kanban_view_inherit" model="ir.ui.view">
+            <field name="name">product.product.kanban.inherit</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_view_kanban_catalog"/>
+            <field name="arch" type="xml">
+                <xpath expr="//h4[contains(@class, 'text-reset')]" position="inside">
+                    <div class="d-flex flex-column">
+                      
+                       
+                    </div>
+                </xpath>
+                <!-- Ocultar el div "o_kanban_price" -->
+                <xpath expr="//div[@name='o_kanban_price']" position="inside">
+                   <div class="o_kanban_price">
+                     <div class="o_kanban_price">
+                        <div><b>Valor Factura:</b></div>
+                            <field name="standard_price" widget="monetary"/>
+                            <field name="currency_id" invisible="1"/>
+                        </div>
+                        <div><b>Cliente:</b></div>
+                            <field name="related_partner_id" options="{'no_create': True}"/>
+                        </div>
+                        <div class="o_kanban_price">
+                            <div><b>No. Etiquetas:</b></div>
+                            <field name="a_qty_etiquetas"/>
+                        </div>
+                </xpath>
+                <!-- Ocultar el div "o_kanban_qty_available" original -->
+                <xpath expr="//div[@name='o_kanban_qty_available']" position="replace">
+                    <div/>
+                </xpath>
+            </field>
+    </record>
+
+
+
+
+        <!--Permite la cotizacion con Porcentajes-->
+         <record id="res_partner_view_form_inherit" model="ir.ui.view">
+            <field name="name">res.partner.form.inherit</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/> 
+            <field name="arch" type="xml">
+                <!-- Colocar el campo default_percentage debajo del campo VAT -->
+                <xpath expr="//field[@name='vat']" position="after">
+                    <field name="default_percentage"/>
+                </xpath>
+            </field>
+        </record>
+
+        <!--agrega el campo de coordenadas al cliente-->
+        <record id="res_partner_view_form_inherit_coordinates" model="ir.ui.view">
+         <field name="name">res.partner.form.inherit.coordinates</field>
+         <field name="model">res.partner</field>
+         <field name="inherit_id" ref="base.view_partner_form"/> 
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='vat']" position="before">
+                  <field name="default_coordinates"/>
+              </xpath>
+            </field>
+        </record>
+        
+         <!-- Heredar la vista de lista del modelo product.template para añadir la columna -->
+        <record id="view_product_template_tree_inherit" model="ir.ui.view">
+            <field name="name">product.template.tree.inherit</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_tree_view"/> <!-- Asegúrate que este ref sea correcto -->
+            <field name="arch" type="xml">
+                <field name="list_price" position="after"> <!-- Posición donde quieres que aparezca tu campo -->
+                    <field name="x_val_arn"/>
+                    <field name="current_location"/>
+                    <field name="related_partner_id"/>
+                    <field name="related_agent_id"/>
+                    <field name="current_quote"/>
+                    <field name="output_number"/>
+                    <field name="t_operacion"/>
+                    <field name="tipo_pago"/>
+                    <field name="is_quoted"/>
+                    <field name="is_in_carga"/>
+                    <field name="is_ready_for_bill"/>
+                    <field name="is_finished"/>
+                    <field name="reviewed"/>
+                </field>
+            </field>
+        </record>
+
+  </data>
+</odoo>

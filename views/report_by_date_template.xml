@@ -1,0 +1,68 @@
+<odoo>
+    <template id="report_by_date_template" name="Report By Date">
+        <t t-call="website.layout">
+            <div class="container">
+                <h1>Report By Date</h1>
+                <form action="/report_by_date/submit" method="post">
+                    <div class="form-group">
+                        <label for="date">Select Date:</label>
+                        <input type="date" id="date" name="date" class="form-control" required="required"/>
+                        <!-- Campos ocultos para pasar los datos del usuario -->
+                        <input type="hidden" name="user_id" t-att-value="request.env.user.id"/>
+                        <input type="hidden" name="email" t-att-value="request.env.user.email"/>
+                        <input type="hidden" name="partner_id" t-att-value="request.env.user.partner_id.id"/>
+                        <input type="hidden" name="user_name" t-att-value="request.env.user.name"/>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Enviar</button>
+                </form>
+            </div>
+        </t>
+    </template>
+
+    <template id="success_template" name="Success">
+        <t t-call="website.layout">
+            <div class="container">
+                <div class="alert alert-success">The report was submitted successfully!</div>
+            </div>
+        </t>
+    </template>
+
+    <template id="failure_template" name="Failure">
+        <t t-call="website.layout">
+            <div class="container">
+                <div class="alert alert-danger">There was an error submitting the report. Please try again.</div>
+            </div>
+        </t>
+    </template>
+    
+  
+    <template id="report_by_date_result" name="Report By Date Result">
+        <t t-call="website.layout">
+            <div class="container">
+                <h1>Products Report for Date: <t t-esc="date_selected"/></h1>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Alias</th>
+                            <th>%</th>
+                            <th>Cost</th>
+                            <th>Arn</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="products" t-as="product">
+                            <td t-esc="product['name']"/>
+                            <td t-esc="product['x_alias']"/>
+                            <td t-esc="product['x_percentage']"/>
+                            <td t-esc="product['x_customer_price']"/>
+                            <td t-esc="product['unit_price']"/>
+                            
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </t>
+    </template>
+
+</odoo>
