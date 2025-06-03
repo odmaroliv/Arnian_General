@@ -6,7 +6,7 @@
 
     'description': """
 Cotizacion por porcentaje, ajuste en los productos campos de cliente y usuario administrador
-modificacion de los porductos para los filtros de entradas no cotizadas, y filtros de entradas por cliente
+modificacion de los productos para los filtros de entradas no cotizadas, y filtros de entradas por cliente
     """,
 
     'author': "Daniel Olivares",
@@ -21,9 +21,9 @@ modificacion de los porductos para los filtros de entradas no cotizadas, y filtr
     # any module necessary for this one to work correctly
     'depends': ['base','sale_management','web', 'portal'],
 
-    # always loadeds
+    # always loaded
     'data': [
-        # 'security/ir.model.access.csv',
+        'security/ir.model.access.csv',
         'views/views.xml',
         'views/templates.xml',
         'views/report_by_date_template.xml',

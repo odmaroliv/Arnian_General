@@ -25,8 +25,18 @@
             <xpath expr="//field[@name='uom_id']" position="attributes">
                 <attribute name="groups">base.group_system</attribute>
             </xpath>
+            <xpath expr="//sheet" position="inside">
+                <page string="Historial de Salidas">
+                    <field name="output_history_ids" nolabel="1">
+                        <tree editable="bottom">
+                            <field name="output_number"/>
+                            <field name="changed_at"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
         </field>
- </record>
+</record>
 
 
 <record id="product_product_search_inherit" model="ir.ui.view">
@@ -87,6 +97,7 @@
                     <filter string="Mis entradas listas para entregar" name="my_products_ready" domain="[('related_agent_id','=',uid),('is_ready_for_bill','=',True),('is_finished','=',False)]"/>
                     <filter string="Mis entradas Finalizadas" name="my_products_is_finished" domain="[('related_agent_id','=',uid),('is_finished','=',True)]"/>
                     <filter string="Mis entradas Revisadas" name="my_products_reviewed" domain="[('related_agent_id','=',uid),('reviewed','=',True)]"/>
+                    <filter string="Con historial de salidas" name="has_output_history" domain="[('output_history_ids','!=',False)]"/>
                      <!-- tipos de operaciones -->
                      <separator string="Tipos de Operaciones (No Finalizadas)" />
                     <filter string="Auto Declaracion" name="t_auto" domain="[('t_operacion','=','01'),('is_finished','=',False),('related_agent_id','=',uid)]"/>
@@ -165,7 +176,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='product_template_id']" position="attributes">
                 <attribute name="domain">[('detailed_type', '=', 'service')]</attribute>
-                <attribute name='options'>{'no_create': True}</attribute>"
+                <attribute name="options">{'no_create': True}</attribute>
             </xpath>
         </field>
     </record>
