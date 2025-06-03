@@ -43,8 +43,7 @@ class ProductTemplate(models.Model):
     
     a_qty_etiquetas = fields.Integer("Etiquetas", default=False, help="Numero de etiquetas o bultos.")
     # Campo para almacenar la ubicación actual
-    # Nota: el nombre del campo y su etiqueta se mantienen para compatibilidad
-    # con la API existente.
+
     current_location = fields.Char('Current Location', help="Ubicacion actual")
     # Historial de cambios en el número de salida
     output_history_ids = fields.One2many('product.output.history', 'product_tmpl_id',
