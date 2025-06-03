@@ -21,7 +21,7 @@ modificacion de los productos para los filtros de entradas no cotizadas, y filtr
     # any module necessary for this one to work correctly
     'depends': ['base','sale_management','web', 'portal'],
 
-    # always loadeds
+    # always loaded
     'data': [
         'security/ir.model.access.csv',
         'views/views.xml',
