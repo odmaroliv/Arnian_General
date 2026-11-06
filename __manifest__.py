@@ -16,14 +16,14 @@ modificacion de los porductos para los filtros de entradas no cotizadas, y filtr
     # Check https://github.com/odoo/odoo/blob/15.0/odoo/addons/base/data/ir_module_category_data.xml
     # for the full list
     'category': 'Sales',
-    'version': '0.67',
+    'version': '0.70',
 
     # any module necessary for this one to work correctly
     'depends': ['base','sale_management','web', 'portal'],
 
     # always loadeds
     'data': [
-        # 'security/ir.model.access.csv',
+        'security/ir.model.access.csv',
         'views/views.xml',
         'views/templates.xml',
         'views/report_by_date_template.xml',

@@ -15,6 +15,9 @@
                 <field name="t_operacion"/>
                 <field name="a_qty_etiquetas" groups="base.group_system"/>
                 <field name="current_quote" groups="base.group_system"/>
+                <field name="output_number"/>
+                <field name="carga_number"/>
+                <field name="total_quote_amount"/>
             </xpath>
             <xpath expr="//field[@name='list_price']" position="attributes">
                 <attribute name="groups">base.group_system</attribute> 
@@ -287,7 +290,10 @@
                     <field name="related_partner_id"/>
                     <field name="related_agent_id"/>
                     <field name="current_quote"/>
+                     <field name="carga_number"/>
                     <field name="output_number"/>
+                    <field name="total_quote_amount"/>
+                    
                     <field name="t_operacion"/>
                     <field name="tipo_pago"/>
                     <field name="is_quoted"/>
@@ -295,9 +301,89 @@
                     <field name="is_ready_for_bill"/>
                     <field name="is_finished"/>
                     <field name="reviewed"/>
+                   
                 </field>
             </field>
         </record>
 
+    <!-- Vistas para historial de salida -->
+    <record id="view_product_output_history_tree" model="ir.ui.view">
+        <field name="name">product.output.history.tree</field>
+        <field name="model">product.output.history</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="product_id"/>
+                <field name="previous_output"/>
+                <field name="new_output"/>
+                <field name="changed_by"/>
+                <field name="changed_at"/>
+            </tree>
+        </field>
+    </record>
+    <record id="view_product_output_history_search" model="ir.ui.view">
+        <field name="name">product.output.history.search</field>
+        <field name="model">product.output.history</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="product_id"/>
+                <field name="changed_by"/>
+                <field name="changed_at"/>
+            </search>
+        </field>
+    </record>
+    <record id="action_product_output_history" model="ir.actions.act_window">
+        <field name="name">Historial de Salidas</field>
+        <field name="res_model">product.output.history</field>
+        <field name="view_mode">tree,search</field>
+    </record>
+
+    <!-- Vistas para historial de carga -->
+    <record id="view_product_carga_history_tree" model="ir.ui.view">
+        <field name="name">product.carga.history.tree</field>
+        <field name="model">product.carga.history</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="product_id"/>
+                <field name="previous_carga"/>
+                <field name="new_carga"/>
+                <field name="changed_by"/>
+                <field name="changed_at"/>
+            </tree>
+        </field>
+    </record>
+    <record id="view_product_carga_history_search" model="ir.ui.view">
+        <field name="name">product.carga.history.search</field>
+        <field name="model">product.carga.history</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="product_id"/>
+                <field name="changed_by"/>
+                <field name="changed_at"/>
+            </search>
+        </field>
+    </record>
+    <record id="action_product_carga_history" model="ir.actions.act_window">
+        <field name="name">Historial de Cargas</field>
+        <field name="res_model">product.carga.history</field>
+        <field name="view_mode">tree,search</field>
+    </record>
+    <menuitem id="menu_product_output_history" name="Historial de Salidas" parent="stock.menu_stock_root" action="action_product_output_history"/>
+    <menuitem id="menu_product_carga_history" name="Historial de Cargas" parent="stock.menu_stock_root" action="action_product_carga_history"/>
+    
+<record id="view_product_template_form_inherit_history_tabs" model="ir.ui.view">
+        <field name="name">product.template.form.inherit.history.tabs</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Historial de Salidas">
+                    <field name="output_history_ids" mode="tree,form" context="{'default_product_id': active_id}"/>
+                </page>
+                <page string="Historial de Cargas">
+                    <field name="carga_history_ids" mode="tree,form" context="{'default_product_id': active_id}"/>
+                </page>
+            </xpath>
+        </field>
+    </record>
   </data>
 </odoo>

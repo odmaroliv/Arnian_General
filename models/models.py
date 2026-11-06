@@ -20,6 +20,7 @@ class ProductTemplate(models.Model):
     is_dedicated = fields.Boolean("Dedicado", default=False, help="Indica si el producto es dedicado.")
     current_quote = fields.Char('Current Quote', help="Cotizacion actual")
     output_number = fields.Char('Salida actual', help="Salida actual")
+    carga_number = fields.Char('Carga actual', help="Carga actual")
 
     is_in_carga = fields.Boolean("En Carga", default=False, help="Indica si el producto ya se asigno a una carga actualmente.")
     bee_notify = fields.Boolean("No Notificacion Beetrack", default=False, help="Indica si no se debe notificar el cliente, si esta en false, se notifica en true no se notifica")
@@ -44,8 +45,55 @@ class ProductTemplate(models.Model):
     a_qty_etiquetas = fields.Integer("Etiquetas", default=False, help="Numero de etiquetas o bultos.")
     # Campo para almacenar la ubicacion actual
     current_location  = fields.Char('Current ', help="Ubicacion actual")
+
+    output_history_ids = fields.One2many('product.output.history', 'product_id', string='Historial de Salidas')
+    carga_history_ids = fields.One2many('product.carga.history', 'product_id', string='Historial de Cargas')
     
+    total_quote_amount = fields.Monetary(
+        string='Total Cotización',
+        compute='_compute_total_quote_amount',
+        currency_field='currency_id',
+        store=False
+    )
+
+    def _compute_total_quote_amount(self):
+        for product in self:
+            # Validación rápida: si no está cotizado o no tiene cotización actual, no buscar nada
+            if not product.is_quoted or not product.current_quote:
+                product.total_quote_amount = 0.0
+                continue
+            # Busca todas las líneas de cotización donde aparece este producto
+            order_lines = self.env['sale.order.line'].search([
+                ('product_id.product_tmpl_id', '=', product.id),
+                ('order_id.state', 'in', ['draft', 'sent', 'sale'])
+            ])
+            if order_lines:
+                # Ordena por fecha de la orden (más reciente primero)
+                orders = order_lines.mapped('order_id')
+                last_order = max(orders, key=lambda o: o.date_order or fields.Datetime.from_string('1970-01-01'), default=None)
+                product.total_quote_amount = last_order.amount_total if last_order else 0.0
+            else:
+                product.total_quote_amount = 0.0
+
     def write(self, vals):
+        # Guardar historial de salida si cambia output_number
+        if 'output_number' in vals:
+            for record in self:
+                self.env['product.output.history'].create({
+                    'product_id': record.id,
+                    'previous_output': record.output_number,
+                    'new_output': vals['output_number'],
+                    'changed_by': self.env.user.id,
+                })
+        # Guardar historial de carga si cambia carga_number
+        if 'carga_number' in vals:
+            for record in self:
+                self.env['product.carga.history'].create({
+                    'product_id': record.id,
+                    'previous_carga': record.carga_number,
+                    'new_carga': vals['carga_number'],
+                    'changed_by': self.env.user.id,
+                })
         result = super(ProductTemplate, self).write(vals)
         
         if 'reviewed' in vals and vals['reviewed']:
