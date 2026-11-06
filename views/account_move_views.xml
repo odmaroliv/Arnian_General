@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Lista de facturas: columna Cotizaciones -->
+    <record id="arnian_view_invoice_tree_sale_orders" model="ir.ui.view">
+        <field name="name">account.move.tree.arnian.sale.orders</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_invoice_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='invoice_origin']" position="after">
+                <field name="arnian_sale_order_ids" widget="many2many_tags" optional="show"
+                       column_invisible="context.get('default_move_type') not in ('out_invoice', 'out_refund', 'out_receipt')"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Formulario de factura: campo Cotizaciones en Otra información -->
+    <record id="arnian_view_move_form_sale_orders" model="ir.ui.view">
+        <field name="name">account.move.form.arnian.sale.orders</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='invoice_origin']" position="after">
+                <field name="arnian_sale_order_ids" widget="many2many_tags" readonly="1"
+                       invisible="move_type not in ('out_invoice', 'out_refund', 'out_receipt')"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Búsqueda: buscar, filtrar y agrupar por cotización -->
+    <record id="arnian_view_account_invoice_filter_sale_orders" model="ir.ui.view">
+        <field name="name">account.move.search.arnian.sale.orders</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="arnian_sale_order_ids" string="Cotización"/>
+            </xpath>
+            <xpath expr="//filter[@name='draft']" position="before">
+                <filter name="arnian_with_sale_order" string="Con cotización"
+                        domain="[('arnian_sale_order_ids', '!=', False)]"/>
+                <filter name="arnian_without_sale_order" string="Sin cotización"
+                        domain="[('arnian_sale_order_ids', '=', False)]"/>
+                <separator/>
+            </xpath>
+            <xpath expr="//group" position="inside">
+                <filter name="arnian_groupby_sale_order" string="Cotización"
+                        context="{'group_by': 'arnian_sale_order_ids'}"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
